@@ -1,0 +1,44 @@
+ZATCA Toolkit
+Copyright 2026 greymoth-jp
+
+This product includes software developed by greymoth-jp, licensed under the
+Apache License, Version 2.0.
+
+--------------------------------------------------------------------------------
+IMPORTANT — SCOPE, COMPLIANCE, AND RESPONSIBILITY
+--------------------------------------------------------------------------------
+
+This software is an OPEN-SOURCE LIBRARY that generates, validates, and
+(deterministically) signs electronic invoices on the customer's own
+infrastructure. It is NOT a hosted clearance service and is NOT a certified
+e-invoicing platform.
+
+This is NOT tax advice and NOT a compliance guarantee. The library reports
+validation results against published rule sets; it does not certify that any
+document is legally compliant. Final tax compliance, the integration of a
+certified solution, and lawful operation remain the responsibility of the
+customer and their professional advisers.
+
+- Saudi Arabia (ZATCA / Fatoora): Live clearance and reporting require an
+  onboarded EGS with a ZATCA-issued Production CSID. This library prepares and
+  signs documents; clearance/reporting submission must go through the customer's
+  own onboarded credentials or a certified partner. Invoice data (which may
+  contain personal data) is stored on the customer side; this library does not
+  retain it.
+- UAE (PINT AE / Peppol), France (PDP), and other jurisdictions: transmission
+  via Peppol/PDP requires an Accredited Service Provider / certified platform.
+  This library produces and validates documents only; accreditation and
+  transmission are delegated to certified partners.
+
+Data residency, retention, and lawful processing obligations are the customer's
+responsibility.
+
+--------------------------------------------------------------------------------
+THIRD-PARTY COMPONENTS
+--------------------------------------------------------------------------------
+
+github.com/decred/dcrd/dcrec/secp256k1/v4 — ISC License
+  secp256k1 elliptic-curve ECDSA used for the ZATCA cryptographic stamp.
+
+This toolkit deliberately avoids AGPL/EUPL/GPL/SSPL dependencies. Only
+Apache-2.0 / MIT / BSD / ISC / MPL-2.0 components are used.

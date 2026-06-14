@@ -1,0 +1,33 @@
+{
+  "name": "@zatca/sdk",
+  "version": "0.1.0",
+  "description": "Open-source ZATCA (Saudi Fatoora Phase 2) e-invoicing SDK — validate, generate, and sign invoices in the browser or Node via WebAssembly.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "src/index.mjs",
+  "types": "index.d.ts",
+  "exports": {
+    ".": "./src/index.mjs",
+    "./wasm/engine.wasm": "./wasm/engine.wasm"
+  },
+  "files": [
+    "src/",
+    "wasm/",
+    "index.d.ts"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "zatca",
+    "fatoora",
+    "e-invoicing",
+    "en16931",
+    "ubl",
+    "ksa",
+    "saudi-arabia"
+  ]
+}

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Docs — ZATCA Toolkit (@zatca/sdk)</title>
+  <meta name="description" content="Quickstart and API reference for @zatca/sdk — generate, validate, sign and (gated) clear ZATCA Fatoora Phase 2 invoices in Node or the browser. Every snippet is run in CI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600;800&family=IBM+Plex+Mono:wght@400;600&family=Reem+Kufi:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="docwrap">
+    <nav class="nav">
+      <span class="seal" aria-hidden="true"><svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"><circle cx="100" cy="100" r="94"/><circle cx="100" cy="100" r="84"/><polygon points="100,18 182,100 100,182 18,100"/><polygon points="158,42 158,158 42,158 42,42"/><polygon points="100,54 146,100 100,146 54,100"/><circle cx="100" cy="100" r="18"/><circle cx="100" cy="100" r="5" fill="currentColor" stroke="none"/></svg></span>
+      <a class="brand" href="index.html" style="text-decoration:none" data-i18n="brand">ZATCA TOOLKIT</a>
+      <span class="spacer"></span>
+      <a class="link" href="index.html" data-i18n="navHome">HOME</a>
+      <a class="link" href="../audit/" data-i18n="navAudit">AUDIT</a>
+      <a class="link" href="https://github.com/greymoth-jp/zatca-toolkit" data-i18n="navGit">GITHUB</a>
+      <span class="lang" role="group" aria-label="Language">
+        <button id="ar" aria-pressed="false" lang="ar">ع</button>
+        <button id="en" aria-pressed="true">EN</button>
+      </span>
+    </nav>
+
+    <div class="docs">
+      <aside class="side">
+        <div class="grp" data-i18n="grpStart">START</div>
+        <a href="#install" data-i18n="navInstall">Install</a>
+        <a href="#quickstart" data-i18n="navQuick">Quickstart</a>
+        <a href="#model" data-i18n="navModel">Invoice model</a>
+        <div class="grp" data-i18n="grpApi">API</div>
+        <a href="#generate" data-i18n="navGen">generate()</a>
+        <a href="#validate" data-i18n="navVal">validateXML / validate</a>
+        <a href="#findings" data-i18n="navFind">Reading findings</a>
+        <a href="#structure" data-i18n="navStruct">validateStructure()</a>
+        <a href="#qr" data-i18n="navQr">validateQR()</a>
+        <a href="#clear" data-i18n="navClear">clear() — gated</a>
+        <a href="#webhooks" data-i18n="navHook">Webhooks</a>
+        <div class="grp" data-i18n="grpMore">MORE</div>
+        <a href="#browser" data-i18n="navBrowser">Browser / WASM</a>
+        <a href="#scope" data-i18n="navScope">Scope &amp; legal</a>
+      </aside>
+
+      <main class="doc-main">
+        <h1 data-i18n="title">Documentation</h1>
+        <p class="lede" data-i18n="lede" style="font-size:1.05rem">Generate, validate, sign and (gated) clear ZATCA Fatoora Phase 2 invoices — in Node or the browser, in-process. The invoice never leaves you.</p>
+
+        <div class="note"><span class="tag" data-i18n="ciTag">VERIFIED IN CI</span><span data-i18n="ciBody">Every code snippet on this page is the exact code in <code>packages/sdk/examples/api-tour.mjs</code>, executed on every push by <code>test/api-tour.test.mjs</code>. If a snippet drifts from the engine, CI goes red — these examples cannot silently rot.</span></div>
+
+        <h2 id="install" data-i18n="hInstall">Install</h2>
+        <p data-i18n="pInstall">Node 20+ or any modern browser. The deterministic engine ships as WebAssembly inside the package — no native build, no server.</p>
+        <div class="codeblock"><div class="bar"><span class="led"></span>shell</div><pre><code>npm install @zatca/sdk</code></pre></div>
+
+        <h2 id="quickstart" data-i18n="hQuick">Quickstart</h2>
+        <p data-i18n="pQuick">Generate ZATCA-UBL from a normalized invoice, then check it would clear — all in-process.</p>
+        <div class="codeblock"><div class="bar"><span class="led"></span>quickstart.mjs</div><pre><code>import { Zatca } from "@zatca/sdk";
+
+const z = new Zatca({ mode: "sandbox" });
+const { ubl } = await z.generate(sampleInvoice);   // normalized -&gt; UBL 2.1 XML
+const r = await z.validateXML(ubl, "zatca-ksa");   // deterministic ZATCA / EN16931
+console.log(r.report.valid ? "would clear" : r.report.errors);
+// -&gt; would clear        (sample invoice: valid, 0 findings)</code></pre></div>
+
+        <h2 id="model" data-i18n="hModel">The normalized invoice model</h2>
+        <p data-i18n="pModel">One plain object describes the invoice; the engine renders the UBL and runs the rules. A KSA standard tax invoice (type_code 388; use 381 for a credit note):</p>
+        <div class="codeblock"><div class="bar"><span class="led"></span>sampleInvoice</div><pre><code>const sampleInvoice = {
+  profile_id: "reporting:1.0",
+  id: "INV-2026-00042",
+  issue_date: "2026-06-14", issue_time: "10:30:00",   // ZATCA requires the time too
+  type_code: "388",                 // 388 tax invoice · 381 credit note
+  currency: "SAR", tax_currency: "SAR",
+  seller: { name: "Acme Trading LLC", name_ar: "شركة أكمي للتجارة",
+            vat_id: "300000000000003", country_code: "SA" },
+  buyer:  { name: "Beta Retail Co", vat_id: "311111111111113", country_code: "SA" },
+  lines: [{ id: "1", quantity: 2, unit_code: "PCE", item_name: "Widget",
+            net_price: 50, net_amount: 100, vat_category: "S", vat_rate: 15 }],
+  tax_breakdown: [{ category: "S", rate: 15, taxable_amount: 100, tax_amount: 15 }],
+  totals: { line_extension_amount: 100, tax_exclusive_amount: 100,
+            tax_amount: 15, tax_inclusive_amount: 115, payable_amount: 115 },
+};</code></pre></div>
+
+        <h2 id="generate" data-i18n="hGen">generate(doc)</h2>
+        <p data-i18n="pGen">Render the normalized model to ZATCA-UBL 2.1 XML.</p>
+        <div class="codeblock"><div class="bar"><span class="led"></span>generate</div><pre><code>const { ok, ubl } = await z.generate(sampleInvoice);
+// ok:  true
+// ubl: "&lt;?xml version=\"1.0\" ...&gt;&lt;Invoice ...&gt;...&lt;/Invoice&gt;"</code></pre></div>
+
+        <h2 id="validate" data-i18n="hVal">validateXML(xml, profile) &amp; validate(doc, profile)</h2>
+        <p data-i18n="pVal">Run the deterministic rule set against either an XML string or the normalized object. The return is a report with a boolean and an array of findings.</p>
+        <div class="codeblock"><div class="bar"><span class="led"></span>validate</div><pre><code>const r = await z.validateXML(ubl, "zatca-ksa");
+// { ok: true, report: { valid: true, errors: [] } }
+
+// or validate the object directly, no XML in hand yet:
+const r2 = await z.validate(sampleInvoice, "en16931");
+// { ok: true, report: { valid: boolean, errors: [...] } }</code></pre></div>
+        <table class="params">
+          <thead><tr><th data-i18n="thProfile">profile</th><th data-i18n="thWhen">when to use</th></tr></thead>
+          <tbody>
+            <tr><td>"zatca-ksa"</td><td data-i18n="prKsa">ZATCA Fatoora Phase 2 (KSA) — EN16931 + ZATCA-KSA rules.</td></tr>
+            <tr><td>"en16931"</td><td data-i18n="prEn">EN16931 semantic core only (cross-border baseline).</td></tr>
+            <tr><td>"peppol-bis"</td><td data-i18n="prPeppol">EN16931 + Peppol BIS rules (default).</td></tr>
+          </tbody>
+        </table>
+
+        <h2 id="findings" data-i18n="hFind">Reading findings</h2>
+        <p data-i18n="pFind">Every finding is actionable: a stable rule id, the offending path, a bilingual message, and a severity. No cryptic codes.</p>
+        <div class="codeblock"><div class="bar"><span class="led"></span>findings</div><pre><code>for (const e of r.report.errors) {
+  console.log(e.rule_id, e.severity, e.message_en);
+  // e.g.  BR-CO-15  fatal  "Invoice total with VAT must equal ..."
+}</code></pre></div>
+        <table class="params">
+          <thead><tr><th data-i18n="thField">field</th><th data-i18n="thMeans">meaning</th></tr></thead>
+          <tbody>
+            <tr><td>rule_id</td><td data-i18n="fRule">Stable id, e.g. BR-CO-15, BR-KSA-ST-PIH.</td></tr>
+            <tr><td>path</td><td data-i18n="fPath">Location of the problem in the document.</td></tr>
+            <tr><td>message_en / message_ar</td><td data-i18n="fMsg">Human message in English and Arabic.</td></tr>
+            <tr><td>severity</td><td data-i18n="fSev">"fatal" or "warning".</td></tr>
+            <tr><td>fix_en / fix_ar</td><td data-i18n="fFix">How to fix it (present on structural &amp; QR findings).</td></tr>
+          </tbody>
+        </table>
+
+        <h2 id="structure" data-i18n="hStruct">validateStructure(xml)</h2>
+        <p data-i18n="pStruct">Check the ZATCA structural elements of a submitted invoice — UUID, ICV, PIH, QR and the signature. Plain UBL has none of these yet, so this is what you see before signing:</p>
+        <div class="codeblock"><div class="bar"><span class="led"></span>structure</div><pre><code>import { loadEngine } from "@zatca/sdk";
+const engine = await loadEngine();
+
+const s = engine.validateStructure(submittedXml);
+// { ok: false, findings: [
+//   { rule_id: "BR-KSA-ST-UUID" }, { rule_id: "BR-KSA-ST-ICV" },
+//   { rule_id: "BR-KSA-ST-PIH" },  { rule_id: "BR-KSA-ST-QR" },
+//   { rule_id: "BR-KSA-ST-SIG" } ] }</code></pre></div>
+
+        <h2 id="qr" data-i18n="hQr">validateQR(qr, opts)</h2>
+        <p data-i18n="pQr">Verify a ZATCA QR (Base64 TLV). A malformed QR returns a finding carrying an English <em>and</em> Arabic fix hint.</p>
+        <div class="codeblock"><div class="bar"><span class="led"></span>qr</div><pre><code>const q = engine.validateQR(qrBase64, { signed: true, simplified: false });
+// { ok: false, findings: [{
+//     rule_id: "BR-KSA-QR-01",
+//     message_en: "...", message_ar: "...",
+//     fix_en: "...", fix_ar: "..." }] }</code></pre></div>
+
+        <h2 id="clear" data-i18n="hClear">clear(signedXml, opts) — credential-gated</h2>
+        <div class="note warn"><span class="tag" data-i18n="gateTag">CREDENTIAL-GATED</span><span data-i18n="gateBody">This SDK does <b>not</b> operate hosted clearance. Live clearance requires your onboarded EGS + ZATCA Production CSID, or a certified partner. The default clearer is a clearly-labeled <b>mock</b> that never claims a real clearance.</span></div>
+        <p data-i18n="pClear">Clearance is idempotent on <code>idempotencyKey</code>: a repeated key replays the first result and can never double-clear. Inject your own clearer for production.</p>
+        <div class="codeblock"><div class="bar"><span class="led"></span>clear</div><pre><code>const z = new Zatca({ mode: "sandbox" /*, clearer: myCertifiedPartnerClearer */ });
+
+const first  = await z.clear(signedXml, { idempotencyKey: "INV-2026-00042" });
+// { status: "cleared", uuid: "INV-2026-00042", mock: true, note: "MOCK clearance ..." }
+
+const replay = await z.clear(signedXml, { idempotencyKey: "INV-2026-00042" });
+// { ..., idempotentReplay: true }   // same key -&gt; never a second clearance</code></pre></div>
+
+        <h2 id="webhooks" data-i18n="hHook">Webhooks</h2>
+        <p data-i18n="pHook">HMAC-SHA256 sign/verify for your own clearance callbacks. Verify against the raw bytes — do not re-serialize the JSON.</p>
+        <div class="codeblock"><div class="bar"><span class="led"></span>webhooks</div><pre><code>import { signWebhook, verifyWebhook } from "@zatca/sdk";
+
+const sig = signWebhook(rawBody, process.env.WHSEC);   // "hmac-sha256=..."
+const ok  = verifyWebhook(rawBody, req.headers["x-signature"], process.env.WHSEC);
+// ok: true   (timing-safe; false on tampered body or wrong secret)</code></pre></div>
+
+        <h2 id="browser" data-i18n="hBrowser">Browser / WASM</h2>
+        <p data-i18n="pBrowser">The same WebAssembly engine runs in the browser — this is exactly how the free <a href="../audit/">auditor</a> validates without a server. A pass in the browser is the same pass the SDK and CI see. Bundle <code>@zatca/sdk/wasm/engine.wasm</code> as an asset and call <code>loadEngine()</code>.</p>
+
+        <h2 id="scope" data-i18n="hScope">Scope &amp; legal</h2>
+        <div class="note warn"><span class="tag" data-i18n="ntaTag">NOT TAX ADVICE</span><span data-i18n="ntaBody">This toolkit reports results against published EN16931 / ZATCA rule sets. It is not tax advice and not a compliance guarantee. Live clearance/reporting, certified integration, data residency and retention are the customer responsibility. Out of scope by design: hosted clearance, ERP/POS breadth, EGS/ASP/PDP accreditation.</span></div>
+
+        <footer style="border-top:0;padding:24px 0 60px"><span data-i18n="foot">Apache-2.0 ·</span> <a href="https://github.com/greymoth-jp/zatca-toolkit">github.com/greymoth-jp/zatca-toolkit</a></footer>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const I18N = {
+      en: { dir:"ltr", brand:"ZATCA TOOLKIT", navHome:"HOME", navAudit:"AUDIT", navGit:"GITHUB",
+        grpStart:"START", navInstall:"Install", navQuick:"Quickstart", navModel:"Invoice model",
+        grpApi:"API", navGen:"generate()", navVal:"validateXML / validate", navFind:"Reading findings",
+        navStruct:"validateStructure()", navQr:"validateQR()", navClear:"clear() — gated", navHook:"Webhooks",
+        grpMore:"MORE", navBrowser:"Browser / WASM", navScope:"Scope & legal",
+        title:"Documentation", lede:"Generate, validate, sign and (gated) clear ZATCA Fatoora Phase 2 invoices — in Node or the browser, in-process. The invoice never leaves you.",
+        ciTag:"VERIFIED IN CI", ciBody:'Every code snippet on this page is the exact code in <code>packages/sdk/examples/api-tour.mjs</code>, executed on every push by <code>test/api-tour.test.mjs</code>. If a snippet drifts from the engine, CI goes red — these examples cannot silently rot.',
+        hInstall:"Install", pInstall:"Node 20+ or any modern browser. The deterministic engine ships as WebAssembly inside the package — no native build, no server.",
+        hQuick:"Quickstart", pQuick:"Generate ZATCA-UBL from a normalized invoice, then check it would clear — all in-process.",
+        hModel:"The normalized invoice model", pModel:"One plain object describes the invoice; the engine renders the UBL and runs the rules. A KSA standard tax invoice (type_code 388; use 381 for a credit note):",
+        hGen:"generate(doc)", pGen:"Render the normalized model to ZATCA-UBL 2.1 XML.",
+        hVal:"validateXML(xml, profile) & validate(doc, profile)", pVal:"Run the deterministic rule set against either an XML string or the normalized object. The return is a report with a boolean and an array of findings.",
+        thProfile:"profile", thWhen:"when to use", prKsa:"ZATCA Fatoora Phase 2 (KSA) — EN16931 + ZATCA-KSA rules.", prEn:"EN16931 semantic core only (cross-border baseline).", prPeppol:"EN16931 + Peppol BIS rules (default).",
+        hFind:"Reading findings", pFind:"Every finding is actionable: a stable rule id, the offending path, a bilingual message, and a severity. No cryptic codes.",
+        thField:"field", thMeans:"meaning", fRule:"Stable id, e.g. BR-CO-15, BR-KSA-ST-PIH.", fPath:"Location of the problem in the document.", fMsg:"Human message in English and Arabic.", fSev:'"fatal" or "warning".', fFix:"How to fix it (present on structural & QR findings).",
+        hStruct:"validateStructure(xml)", pStruct:"Check the ZATCA structural elements of a submitted invoice — UUID, ICV, PIH, QR and the signature. Plain UBL has none of these yet, so this is what you see before signing:",
+        hQr:"validateQR(qr, opts)", pQr:"Verify a ZATCA QR (Base64 TLV). A malformed QR returns a finding carrying an English and Arabic fix hint.",
+        hClear:"clear(signedXml, opts) — credential-gated", gateTag:"CREDENTIAL-GATED", gateBody:"This SDK does <b>not</b> operate hosted clearance. Live clearance requires your onboarded EGS + ZATCA Production CSID, or a certified partner. The default clearer is a clearly-labeled <b>mock</b> that never claims a real clearance.",
+        pClear:'Clearance is idempotent on <code>idempotencyKey</code>: a repeated key replays the first result and can never double-clear. Inject your own clearer for production.',
+        hHook:"Webhooks", pHook:"HMAC-SHA256 sign/verify for your own clearance callbacks. Verify against the raw bytes — do not re-serialize the JSON.",
+        hBrowser:"Browser / WASM", pBrowser:'The same WebAssembly engine runs in the browser — this is exactly how the free <a href="../audit/">auditor</a> validates without a server. A pass in the browser is the same pass the SDK and CI see. Bundle <code>@zatca/sdk/wasm/engine.wasm</code> as an asset and call <code>loadEngine()</code>.',
+        hScope:"Scope & legal", ntaTag:"NOT TAX ADVICE", ntaBody:"This toolkit reports results against published EN16931 / ZATCA rule sets. It is not tax advice and not a compliance guarantee. Live clearance/reporting, certified integration, data residency and retention are the customer responsibility. Out of scope by design: hosted clearance, ERP/POS breadth, EGS/ASP/PDP accreditation.",
+        foot:"Apache-2.0 ·" },
+      ar: { dir:"rtl", brand:"مجموعة أدوات زاتكا", navHome:"الرئيسية", navAudit:"الفحص", navGit:"GITHUB",
+        grpStart:"البداية", navInstall:"التثبيت", navQuick:"البدء السريع", navModel:"نموذج الفاتورة",
+        grpApi:"الواجهة البرمجية", navGen:"generate()", navVal:"validateXML / validate", navFind:"قراءة النتائج",
+        navStruct:"validateStructure()", navQr:"validateQR()", navClear:"clear() — مقيّد", navHook:"Webhooks",
+        grpMore:"المزيد", navBrowser:"المتصفح / WASM", navScope:"النطاق والقانون",
+        title:"الوثائق", lede:"أنشئ وتحقّق ووقّع وخلّص (مقيّد) فواتير زاتكا فاتورة المرحلة الثانية — في Node أو المتصفح، داخل العملية. لا تغادر الفاتورة جهازك.",
+        ciTag:"مُتحقَّق في CI", ciBody:'كل مقطع كود في هذه الصفحة هو نفس الكود في <code>packages/sdk/examples/api-tour.mjs</code>، يُنفَّذ عند كل push عبر <code>test/api-tour.test.mjs</code>. إن انحرف المقطع عن المحرّك يفشل CI — هذه الأمثلة لا تتقادم بصمت.',
+        hInstall:"التثبيت", pInstall:"Node 20+ أو أي متصفح حديث. يأتي المحرّك الحتمي كـ WebAssembly داخل الحزمة — بلا بناء native ولا خادم.",
+        hQuick:"البدء السريع", pQuick:"أنشئ UBL لزاتكا من فاتورة موحّدة ثم تحقّق أنها ستُخلَّص — كله داخل العملية.",
+        hModel:"نموذج الفاتورة الموحّد", pModel:"كائن واحد يصف الفاتورة؛ المحرّك يولّد UBL ويطبّق القواعد. فاتورة ضريبية قياسية سعودية (type_code 388؛ استخدم 381 لإشعار دائن):",
+        hGen:"generate(doc)", pGen:"حوّل النموذج الموحّد إلى UBL 2.1 لزاتكا.",
+        hVal:"validateXML(xml, profile) و validate(doc, profile)", pVal:"طبّق مجموعة القواعد الحتمية على نص XML أو على الكائن الموحّد. النتيجة تقرير فيه قيمة منطقية ومصفوفة نتائج.",
+        thProfile:"الملف", thWhen:"متى يُستخدم", prKsa:"زاتكا فاتورة المرحلة ٢ (السعودية) — قواعد EN16931 + زاتكا.", prEn:"نواة EN16931 الدلالية فقط (أساس عابر للحدود).", prPeppol:"EN16931 + قواعد Peppol BIS (الافتراضي).",
+        hFind:"قراءة النتائج", pFind:"كل نتيجة قابلة للتنفيذ: معرّف قاعدة ثابت، المسار المخالف، رسالة ثنائية اللغة، ودرجة خطورة. بلا رموز غامضة.",
+        thField:"الحقل", thMeans:"المعنى", fRule:"معرّف ثابت، مثل BR-CO-15، BR-KSA-ST-PIH.", fPath:"موضع المشكلة في المستند.", fMsg:"رسالة بشرية بالإنجليزية والعربية.", fSev:'"fatal" أو "warning".', fFix:"كيفية الإصلاح (موجودة في نتائج البنية وQR).",
+        hStruct:"validateStructure(xml)", pStruct:"افحص عناصر البنية لزاتكا في فاتورة مُقدَّمة — UUID وICV وPIH وQR والتوقيع. UBL العادي لا يملكها بعد، فهذا ما تراه قبل التوقيع:",
+        hQr:"validateQR(qr, opts)", pQr:"تحقّق من رمز QR لزاتكا (Base64 TLV). الرمز التالف يُرجع نتيجة تحمل إرشاد إصلاح بالإنجليزية والعربية.",
+        hClear:"clear(signedXml, opts) — مقيّد بالاعتماد", gateTag:"مقيّد بالاعتماد", gateBody:"هذه الأداة <b>لا</b> تُشغّل تخليصاً مُستضافاً. التخليص الفعلي يتطلّب اعتماد EGS وبيانات زاتكا الإنتاجية أو شريكاً معتمداً. المُخلِّص الافتراضي <b>محاكاة</b> موسومة بوضوح لا تدّعي تخليصاً حقيقياً.",
+        pClear:'التخليص idempotent على <code>idempotencyKey</code>: المفتاح المكرّر يعيد أول نتيجة ولا يخلّص مرتين أبداً. مرّر مُخلِّصك الخاص للإنتاج.',
+        hHook:"Webhooks", pHook:"توقيع/تحقق HMAC-SHA256 لردود التخليص لديك. تحقّق من البايتات الخام — لا تُعِد تسلسل JSON.",
+        hBrowser:"المتصفح / WASM", pBrowser:'يعمل نفس محرّك WebAssembly في المتصفح — هكذا يتحقّق <a href="../audit/">الفاحص</a> المجاني بلا خادم. النجاح في المتصفح هو نفسه نجاح SDK وCI. ضمّن <code>@zatca/sdk/wasm/engine.wasm</code> كأصل ونادِ <code>loadEngine()</code>.',
+        hScope:"النطاق والقانون", ntaTag:"ليست استشارة ضريبية", ntaBody:"تعرض هذه الأداة النتائج وفق قواعد EN16931 / زاتكا المنشورة. ليست استشارة ضريبية ولا ضمان امتثال. التخليص الفعلي والتكامل المعتمد وإقامة البيانات والاحتفاظ مسؤولية العميل. خارج النطاق عمداً: التخليص المُستضاف، اتساع ERP/POS، اعتماد EGS/ASP/PDP.",
+        foot:"Apache-2.0 ·" },
+    };
+    function setLang(l){
+      const t = I18N[l]; document.documentElement.lang = l; document.documentElement.dir = t.dir;
+      document.getElementById("en").setAttribute("aria-pressed", String(l==="en"));
+      document.getElementById("ar").setAttribute("aria-pressed", String(l==="ar"));
+      document.querySelectorAll("[data-i18n]").forEach(e=>{ const v=t[e.getAttribute("data-i18n")]; if(typeof v==="string"){ if(/<[a-z]/i.test(v)) e.innerHTML=v; else e.textContent=v; } });
+    }
+    document.getElementById("en").addEventListener("click",()=>setLang("en"));
+    document.getElementById("ar").addEventListener("click",()=>setLang("ar"));
+    // copy buttons
+    document.querySelectorAll(".codeblock").forEach(b=>{
+      const code = b.querySelector("code"); if(!code) return;
+      const btn = document.createElement("button"); btn.className="copy"; btn.type="button"; btn.textContent="copy";
+      btn.addEventListener("click", async ()=>{ try { await navigator.clipboard.writeText(code.innerText); btn.textContent="copied"; btn.classList.add("ok"); setTimeout(()=>{btn.textContent="copy";btn.classList.remove("ok");},1200);} catch { btn.textContent="select+copy"; } });
+      b.appendChild(btn);
+    });
+    setLang("en");
+  </script>
+</body>
+</html>

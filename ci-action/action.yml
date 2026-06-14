@@ -1,0 +1,33 @@
+name: 'ZATCA Check'
+description: 'Validate ZATCA / UBL 2.1 invoices in CI and fail the build if any would not clear. Deterministic, offline. Not tax advice.'
+branding:
+  icon: 'check-circle'
+  color: 'green'
+inputs:
+  files:
+    description: 'Space-separated invoice XML files or globs to check.'
+    required: true
+  structural:
+    description: 'Also verify submitted-invoice elements (UUID/ICV/PIH/QR/XAdES signature).'
+    required: false
+    default: 'false'
+  go-version:
+    description: 'Go toolchain version used to build the checker.'
+    required: false
+    default: '1.25'
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-go@v5
+      with:
+        go-version: ${{ inputs.go-version }}
+    - name: Build zatca-check
+      shell: bash
+      working-directory: ${{ github.action_path }}/../packages/core
+      run: go build -o "$RUNNER_TEMP/zatca-check" ./cmd/zatca-check
+    - name: Run zatca-check
+      shell: bash
+      run: |
+        flag=""
+        if [ "${{ inputs.structural }}" = "true" ]; then flag="--structural"; fi
+        "$RUNNER_TEMP/zatca-check" $flag ${{ inputs.files }}

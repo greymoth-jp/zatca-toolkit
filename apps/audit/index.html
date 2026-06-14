@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clearance Statement — is your invoice ZATCA-cleared?</title>
+  <meta name="description" content="Free, private, in-browser ZATCA (Fatoora Phase 2) invoice check. Paste your UBL XML — it never leaves your device. Get an official-style clearance verdict. Not tax advice." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600;800&family=IBM+Plex+Mono:wght@400;600&family=Reem+Kufi:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ink-bleed filter for the rubber stamp -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="inkbleed" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.012" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
+  <div class="wrap">
+    <header class="masthead">
+      <span class="seal" aria-hidden="true"><img src="assets/guilloche.png" alt="" /></span>
+      <span class="title"><span class="ar" data-i18n="mastheadAr">بيان حالة التخليص</span><span class="en" data-i18n="mastheadEn">CLEARANCE STATEMENT · ZATCA TOOLKIT</span></span>
+      <span class="lang-toggle" role="group" aria-label="Language">
+        <button id="lang-ar" aria-pressed="false" lang="ar">ع</button>
+        <button id="lang-en" aria-pressed="true">EN</button>
+      </span>
+    </header>
+
+    <section class="hero">
+      <div class="refline mono"><span data-i18n="refDoc">FORM ZX-1 · SELF-CHECK</span><span data-i18n="refWave">FATOORA PHASE 2 · WAVE 24</span></div>
+      <h1 data-i18n-html="headline">An invoice that is <span class="fear">not cleared</span> is not paid.</h1>
+      <p class="lede" data-i18n="lede">Submit your invoice for an instant clearance check. It runs entirely in your browser — your invoice never leaves your device.</p>
+    </section>
+
+    <section class="console" aria-label="Invoice input">
+      <div class="console-head"><span class="led" id="engine-led"></span><span id="engine-status" data-i18n="engineLoading">loading rule engine…</span></div>
+      <label class="sr-only" for="xml" data-i18n="inputLabel">Invoice UBL XML</label>
+      <textarea id="xml" spellcheck="false" data-i18n-ph="placeholder" placeholder="&lt;Invoice xmlns=…&gt;  … paste your ZATCA / UBL 2.1 invoice XML here …"></textarea>
+      <div class="console-foot">
+        <div class="samples">
+          <button id="sample-good" class="btn" data-i18n="sampleGood">valid sample</button>
+          <button id="sample-bad" class="btn" data-i18n="sampleBad">broken sample</button>
+          <button id="clear-input" class="btn" data-i18n="clearBtn">clear</button>
+        </div>
+        <span class="spacer"></span>
+        <button id="run" class="cta" data-i18n="runBtn">Stamp it</button>
+      </div>
+    </section>
+
+    <section id="skeleton" class="skeleton hidden" aria-hidden="true">
+      <div class="bar big"></div><div class="bar"></div><div class="bar" style="width:80%"></div>
+      <p class="progress-copy mono" data-i18n="checking">parsing UBL · applying EN16931 + ZATCA rules · deterministic, offline…</p>
+    </section>
+
+    <section id="errbox" class="errbox hidden" role="alert">
+      <b data-i18n="errTitle">Could not read that invoice.</b>
+      <p id="err-detail" class="mono"></p>
+      <p data-i18n="errHint">Expected a UBL 2.1 Invoice (root &lt;Invoice&gt;). Try the sample buttons above.</p>
+    </section>
+
+    <section id="result" class="result hidden" aria-live="polite">
+      <div id="cert" class="cert">
+        <div class="watermark" aria-hidden="true"><img src="assets/guilloche.png" alt="" /></div>
+        <div class="cert-masthead"><span class="doc mono" data-i18n="certDoc">CLEARANCE STATEMENT</span><span class="doc mono" id="cert-ref">REF —</span></div>
+        <div class="microprint" aria-hidden="true">ZATCA·CLEARANCE·فاتورة·ZATCA·CLEARANCE·فاتورة·ZATCA·CLEARANCE·فاتورة·ZATCA·CLEARANCE·فاتورة·ZATCA·CLEARANCE·فاتورة·ZATCA·CLEARANCE·فاتورة·ZATCA·CLEARANCE·فاتورة·ZATCA·CLEARANCE·فاتورة·ZATCA·CLEARANCE·فاتورة·ZATCA·CLEARANCE·فاتورة·ZATCA·CLEARANCE·فاتورة·ZATCA·CLEARANCE</div>
+        <div class="cert-body">
+          <div class="stamp-wrap"><span class="stamp"><span class="ar" id="verdict-stamp-ar">مرفوضة</span><span id="verdict-stamp">REJECTED</span></span></div>
+          <h2 id="verdict-title"></h2>
+          <p class="sub" id="verdict-sub"></p>
+          <div class="tally" id="tally"><span class="big" id="tally-big">0</span><span class="unit" id="tally-unit">fatal findings</span></div>
+        </div>
+
+        <!-- findings: grouped fatal / warning, rendered by JS -->
+        <div id="findings" class="findings"></div>
+
+        <!-- QR TLV decoder panel -->
+        <div class="qr-panel" id="qr-panel">
+          <div class="qr-panel-hdr mono" data-i18n="qrSectionTitle">QR CODE · TLV DECODED</div>
+          <div id="qr-section" class="qr-section"></div>
+          <div class="qr-manual-row">
+            <label class="sr-only" for="qr-manual" data-i18n="qrPasteHint">Or paste a raw Base64 QR string here to decode it:</label>
+            <textarea id="qr-manual" class="qr-manual-input mono" rows="2" data-i18n-ph="qrPasteHint" placeholder="Or paste a raw Base64 QR string here to decode it:" spellcheck="false"></textarea>
+            <button id="qr-decode-btn" class="btn" data-i18n="qrDecodeBtn">Decode QR</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="share" class="cta" data-i18n="shareBtn">Share the certificate</button>
+          <a id="cta-docs" class="cta alt" href="#" data-i18n="fixBtn">How to fix it</a>
+        </div>
+        <div class="cert-foot">
+          <span class="serial mono" id="cert-serial">No. ZX-2026-000000</span>
+          <span class="barcode" aria-hidden="true"></span>
+        </div>
+      </div>
+      <div id="share-card" class="share hidden"><canvas id="share-canvas" width="1200" height="630" aria-label="Shareable clearance certificate"></canvas>
+        <div class="actions"><button id="dl" class="btn" data-i18n="downloadBtn">download certificate</button></div>
+      </div>
+    </section>
+
+    <p class="disclaimer">
+      <span class="mono" data-i18n="discTag">// NOT TAX ADVICE</span>
+      <span data-i18n="disclaimer"> This tool reports results against published EN16931 / ZATCA rule sets. It is not tax advice and not a compliance guarantee. Live clearance requires your onboarded EGS + ZATCA credentials or a certified partner. Final compliance is your responsibility. Your invoice is processed entirely in your browser and is never uploaded.</span>
+    </p>
+    <footer><span data-i18n="oss">Open source · Apache-2.0 ·</span> <a href="https://github.com/greymoth-jp/zatca-toolkit" rel="noopener">github.com/greymoth-jp/zatca-toolkit</a></footer>
+  </div>
+
+  <script src="engine/wasm_exec.js"></script>
+  <script src="app.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ZATCA Toolkit — Clear every invoice. Never stop the cash.</title>
+  <meta name="description" content="Open-source ZATCA (Saudi Fatoora Phase 2) e-invoicing toolkit. Generate, validate and sign compliant invoices in a few lines, on your own infrastructure. Arabic-first. Not tax advice." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600;800&family=IBM+Plex+Mono:wght@400;600&family=Reem+Kufi:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <nav class="nav">
+      <span class="seal" aria-hidden="true"><svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"><circle cx="100" cy="100" r="94"/><circle cx="100" cy="100" r="84"/><polygon points="100,18 182,100 100,182 18,100"/><polygon points="158,42 158,158 42,158 42,42"/><polygon points="100,54 146,100 100,146 54,100"/><circle cx="100" cy="100" r="18"/><circle cx="100" cy="100" r="5" fill="currentColor" stroke="none"/></svg></span>
+      <span class="brand" data-i18n="brand">ZATCA TOOLKIT</span>
+      <span class="spacer"></span>
+      <a class="link" href="docs.html" data-i18n="navDocs">DOCS</a>
+      <span class="lang" role="group" aria-label="Language">
+        <button id="ar" aria-pressed="false" lang="ar">ع</button>
+        <button id="en" aria-pressed="true">EN</button>
+      </span>
+      <a class="cta mint" href="../audit/" data-i18n="navCheck" style="margin-inline-start:12px">Free check</a>
+    </nav>
+
+    <section class="hero">
+      <div class="watermark" aria-hidden="true"><img src="assets/guilloche.png" alt="" /></div>
+      <div class="inner">
+        <div class="hero-copy">
+          <p class="kicker" data-i18n="kicker">FATOORA PHASE 2 · WAVE 24 · OPEN SOURCE</p>
+          <h1 data-i18n-html="headline">Clear every invoice. <span class="fear">Never stop the cash.</span></h1>
+          <p class="lede" data-i18n="lede">Open-source ZATCA toolkit. Generate, validate and sign compliant invoices in a few lines — on your own infrastructure. The invoice never leaves you.</p>
+          <div class="actions">
+            <a class="cta" href="../audit/" data-i18n="ctaCheck">Check your invoice free</a>
+            <a class="cta mint" href="https://github.com/greymoth-jp/zatca-toolkit" style="background:var(--paper);color:var(--ink)" data-i18n="ctaGithub">View on GitHub</a>
+          </div>
+        </div>
+
+        <figure class="specimen" aria-label="Sample cleared tax invoice">
+          <figcaption class="spec-head">
+            <span class="spec-title" data-i18n="specTitle">TAX INVOICE · فاتورة ضريبية</span>
+            <span class="mono spec-uuid">UUID 3cf5…a91</span>
+          </figcaption>
+          <div class="spec-rows mono">
+            <div><span data-i18n="specSeller">Seller VAT</span><b>3•••••••••••••3</b></div>
+            <div><span data-i18n="specTotal">Total incl. VAT</span><b>1,150.00 SAR</b></div>
+            <div><span data-i18n="specVat">VAT 15%</span><b>150.00 SAR</b></div>
+            <div><span data-i18n="specChain">ICV / PIH</span><b>42 · NWZ…b7</b></div>
+          </div>
+          <div class="spec-foot">
+            <span class="qr" aria-hidden="true"></span>
+            <span class="mono" data-i18n="specFoot">validated client-side · EN16931 + ZATCA</span>
+          </div>
+          <span class="stamp cleared" aria-hidden="true">CLEARED<small>مُخلَّص</small></span>
+        </figure>
+      </div>
+    </section>
+
+    <section class="fear-strip">
+      <p data-i18n-html="fear">An invoice that is <span class="accent">not cleared</span> is not a valid tax invoice — your buyer cannot deduct the VAT, and your payment stops.</p>
+    </section>
+
+    <section class="block">
+      <p class="eyebrow" data-i18n="eyeStart">START IN SECONDS</p>
+      <h2 class="sec" data-i18n="secStart">A few lines. Runs anywhere.</h2>
+      <div class="codeblock">
+        <div class="bar"><span class="led"></span><span data-i18n="codeBar">@zatca/sdk · CI-tested · browser or node</span></div>
+        <pre><code><span class="cm">// validate an invoice — deterministic, offline, in-process</span>
+import { Zatca } from "@zatca/sdk";
+
+const z = new Zatca({ mode: "sandbox" });
+const { ubl } = await z.generate(myInvoice);        <span class="cm">// normalized -> UBL 2.1</span>
+const r = await z.validateXML(ubl, "zatca-ksa");     <span class="cm">// ZATCA + EN16931 rules</span>
+r.report.valid ? ship(ubl) : fix(r.report.errors);   <span class="cm">// each error: rule_id + ar/en + fix</span></code></pre>
+      </div>
+    </section>
+
+    <section class="block">
+      <p class="eyebrow" data-i18n="eyeHow">HOW IT WORKS</p>
+      <h2 class="sec" data-i18n="secHow">Generate · validate · clear.</h2>
+      <div class="steps">
+        <div class="step"><div class="n">01</div><h3 data-i18n="s1h">Generate</h3><p data-i18n="s1p">Normalize your data to EN16931 and emit ZATCA-UBL 2.1 with ICV/PIH chain and QR.</p></div>
+        <div class="step"><div class="n">02</div><h3 data-i18n="s2h">Validate</h3><p data-i18n="s2p">Deterministic ZATCA + EN16931 rules. Every failure tells you the fix, in Arabic and English.</p></div>
+        <div class="step"><div class="n">03</div><h3 data-i18n="s3h">Sign &amp; clear</h3><p data-i18n="s3p">secp256k1 XAdES signature; clearance goes through your onboarded credentials or a certified partner.</p></div>
+      </div>
+    </section>
+
+    <!-- Architecture diagram: two-tier engine -->
+    <section class="block arch-section">
+      <p class="eyebrow" data-i18n="eyeArch">ARCHITECTURE</p>
+      <h2 class="sec" data-i18n="secArch">Two-tier engine.</h2>
+      <figure class="arch-fig">
+        <!--
+          Hard-coded colors match CSS vars:
+            #f2ece0 = --paper      #14110c = --ink / --rule
+            #e9e1d1 = --paper-2   #4f4838 = --ink-dim
+            #cabfa7 = --hair      #837a64 = --ink-faint
+            #b00d28 = --reject    #0a5c33 = --cleared
+          SVG can't reference CSS custom properties in attributes, so values are inlined.
+          viewBox="0 0 960 380" → scales freely; container max-width in CSS.
+        -->
+        <svg viewBox="0 0 960 380" xmlns="http://www.w3.org/2000/svg"
+             class="arch-svg" role="img"
+             aria-labelledby="arch-title" aria-describedby="arch-desc">
+          <title id="arch-title">Two-Tier Validation Engine</title>
+          <desc id="arch-desc">Invoice data enters on the left. Tier 1, the zero-dependency WASM core, runs Generate, Validate (EN16931 plus ZATCA-KSA rules), and Sign deterministically in-process in the browser or Node. A failed Validate emits rule_id plus fix in Arabic and English. After Sign, an opt-in dashed path leads to Tier 2, the Saxon Schematron adjunct, which applies the full 211-rule EN16931 corpus and approximately 130 Peppol rules. Both paths converge at Cleared.</desc>
+
+          <defs>
+            <!-- subtle girih tile repeat inside tier boxes -->
+            <pattern id="girih-sm" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+              <polygon points="16,2 30,16 16,30 2,16" fill="none" stroke="#14110c" stroke-width="0.35" opacity="0.10"/>
+            </pattern>
+            <!-- arrowhead: ink -->
+            <marker id="ah-ink" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+              <polygon points="0,0 7,3.5 0,7" fill="#14110c"/>
+            </marker>
+            <!-- arrowhead: cleared green -->
+            <marker id="ah-grn" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+              <polygon points="0,0 7,3.5 0,7" fill="#0a5c33"/>
+            </marker>
+            <!-- arrowhead: reject red -->
+            <marker id="ah-red" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+              <polygon points="0,0 7,3.5 0,7" fill="#b00d28"/>
+            </marker>
+          </defs>
+
+          <!-- ── canvas bg ── -->
+          <rect width="960" height="380" fill="#f2ece0"/>
+          <rect width="960" height="380" fill="url(#girih-sm)"/>
+
+          <!-- ════════════════════════════════════════════════════════
+               TIER 1 — WASM CORE  (x=90 y=54 w=550 h=196)
+          ════════════════════════════════════════════════════════ -->
+          <rect x="90" y="54" width="550" height="196" fill="#f2ece0" stroke="#14110c" stroke-width="2.5"/>
+          <!-- inner hairline -->
+          <rect x="96" y="60" width="538" height="184" fill="none" stroke="#cabfa7" stroke-width="0.8"/>
+          <!-- header band -->
+          <rect x="90" y="54" width="550" height="24" fill="#14110c"/>
+          <text x="104" y="70" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="10.5" fill="#f2ece0" letter-spacing="1.6">TIER 1 — ZERO-DEPENDENCY WASM CORE · BROWSER + NODE</text>
+
+          <!-- node: GENERATE (x=112 y=98 w=120 h=56) -->
+          <rect x="112" y="98" width="120" height="56" fill="#f2ece0" stroke="#14110c" stroke-width="2.5"/>
+          <text x="172" y="124" font-family="'Archivo Black','Arial Black',sans-serif" font-size="12.5" fill="#14110c" text-anchor="middle" letter-spacing=".4">GENERATE</text>
+          <text x="172" y="141" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="8.5" fill="#4f4838" text-anchor="middle">UBL 2.1 · ICV/PIH · QR</text>
+
+          <!-- arrow GENERATE → VALIDATE -->
+          <line x1="233" y1="126" x2="264" y2="126" stroke="#14110c" stroke-width="2" marker-end="url(#ah-ink)"/>
+
+          <!-- node: VALIDATE (x=266 y=98 w=120 h=56) -->
+          <rect x="266" y="98" width="120" height="56" fill="#f2ece0" stroke="#14110c" stroke-width="2.5"/>
+          <text x="326" y="124" font-family="'Archivo Black','Arial Black',sans-serif" font-size="12.5" fill="#14110c" text-anchor="middle" letter-spacing=".4">VALIDATE</text>
+          <text x="326" y="141" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="8.5" fill="#4f4838" text-anchor="middle">EN16931 + ZATCA-KSA</text>
+
+          <!-- error branch: VALIDATE → down (rule_id + fix) -->
+          <line x1="326" y1="154" x2="326" y2="200" stroke="#b00d28" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ah-red)"/>
+          <text x="333" y="186" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="8" fill="#b00d28">rule_id + ar/en fix</text>
+
+          <!-- arrow VALIDATE → SIGN -->
+          <line x1="387" y1="126" x2="418" y2="126" stroke="#14110c" stroke-width="2" marker-end="url(#ah-ink)"/>
+
+          <!-- node: SIGN (x=420 y=98 w=120 h=56) -->
+          <rect x="420" y="98" width="120" height="56" fill="#f2ece0" stroke="#14110c" stroke-width="2.5"/>
+          <text x="480" y="124" font-family="'Archivo Black','Arial Black',sans-serif" font-size="12.5" fill="#14110c" text-anchor="middle" letter-spacing=".4">SIGN</text>
+          <text x="480" y="141" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="8.5" fill="#4f4838" text-anchor="middle">secp256k1 XAdES</text>
+
+          <!-- tier 1 footer note -->
+          <text x="365" y="228" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="9" fill="#837a64" text-anchor="middle">deterministic · offline · Apache-2.0</text>
+
+          <!-- ════════════════════════════════════════════════════════
+               TIER 2 — SCHEMATRON ADJUNCT  (x=690 y=54 w=240 h=196)
+               dashed green border = opt-in
+          ════════════════════════════════════════════════════════ -->
+          <rect x="690" y="54" width="240" height="196" fill="#f2ece0" stroke="#0a5c33" stroke-width="2.5" stroke-dasharray="9 5"/>
+          <rect x="696" y="60" width="228" height="184" fill="none" stroke="#cabfa7" stroke-width="0.8" stroke-dasharray="4 3"/>
+          <!-- header band: green -->
+          <rect x="690" y="54" width="240" height="24" fill="#0a5c33"/>
+          <text x="810" y="70" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="10.5" fill="#f2ece0" letter-spacing="1.4" text-anchor="middle">TIER 2 — OPT-IN ADJUNCT</text>
+
+          <!-- schematron box -->
+          <rect x="708" y="90" width="204" height="54" fill="#f2ece0" stroke="#0a5c33" stroke-width="2"/>
+          <text x="810" y="114" font-family="'Archivo Black','Arial Black',sans-serif" font-size="12.5" fill="#0a5c33" text-anchor="middle" letter-spacing=".3">SCHEMATRON</text>
+          <text x="810" y="131" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="8.5" fill="#4f4838" text-anchor="middle">Saxon · official XSLT</text>
+
+          <!-- rule count panel -->
+          <rect x="708" y="158" width="204" height="72" fill="#e9e1d1" stroke="#cabfa7" stroke-width="1"/>
+          <!-- EN16931 count -->
+          <text x="762" y="178" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="8.5" fill="#0a5c33" text-anchor="middle" font-weight="700">EN16931</text>
+          <text x="762" y="202" font-family="'Archivo Black','Arial Black',sans-serif" font-size="22" fill="#0a5c33" text-anchor="middle">211</text>
+          <text x="762" y="218" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="7.5" fill="#837a64" text-anchor="middle">rules</text>
+          <!-- divider -->
+          <line x1="810" y1="162" x2="810" y2="226" stroke="#cabfa7" stroke-width="1"/>
+          <!-- Peppol count -->
+          <text x="858" y="178" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="8.5" fill="#4f4838" text-anchor="middle" font-weight="700">PEPPOL</text>
+          <text x="858" y="202" font-family="'Archivo Black','Arial Black',sans-serif" font-size="22" fill="#4f4838" text-anchor="middle">~130</text>
+          <text x="858" y="218" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="7.5" fill="#837a64" text-anchor="middle">rules</text>
+
+          <!-- ════════════════════════════════════════════════════════
+               FLOW ELEMENTS
+          ════════════════════════════════════════════════════════ -->
+
+          <!-- INPUT node (invoice data) -->
+          <rect x="8" y="104" width="80" height="44" fill="#f2ece0" stroke="#14110c" stroke-width="2"/>
+          <text x="48" y="124" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="9" fill="#14110c" text-anchor="middle" letter-spacing=".5">INVOICE</text>
+          <text x="48" y="138" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="8" fill="#837a64" text-anchor="middle">data in</text>
+          <!-- arrow: INPUT → GENERATE -->
+          <line x1="89" y1="126" x2="110" y2="126" stroke="#14110c" stroke-width="2" marker-end="url(#ah-ink)"/>
+
+          <!-- opt-in arrow: SIGN → TIER 2 (dashed green, horizontal) -->
+          <line x1="541" y1="126" x2="688" y2="126" stroke="#0a5c33" stroke-width="2" stroke-dasharray="8 4" marker-end="url(#ah-grn)"/>
+          <!-- label on opt-in arrow -->
+          <rect x="570" y="112" width="88" height="14" rx="2" fill="#f2ece0"/>
+          <text x="614" y="123" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="8.5" fill="#0a5c33" text-anchor="middle" letter-spacing=".5">opt-in adjunct →</text>
+
+          <!-- CLEARED terminal — below center, shared by both paths -->
+          <!-- from SIGN straight down (core-only path) -->
+          <line x1="480" y1="154" x2="480" y2="302" stroke="#14110c" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#ah-ink)"/>
+          <text x="487" y="298" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="7.5" fill="#837a64">core-only path</text>
+
+          <!-- from TIER 2 bottom → CLEARED -->
+          <line x1="810" y1="251" x2="810" y2="302" stroke="#0a5c33" stroke-width="2" marker-end="url(#ah-grn)"/>
+
+          <!-- CLEARED terminal box (spans across) -->
+          <rect x="390" y="304" width="480" height="52" fill="#0a5c33" stroke="#0a5c33" stroke-width="2"/>
+          <!-- inner border -->
+          <rect x="396" y="310" width="468" height="40" fill="none" stroke="#cabfa7" stroke-width="0.8"/>
+          <text x="630" y="329" font-family="'Archivo Black','Arial Black',sans-serif" font-size="15" fill="#f2ece0" text-anchor="middle" letter-spacing="1.5">CLEARED</text>
+          <text x="630" y="347" font-family="'Reem Kufi','Noto Kufi Arabic',sans-serif" font-size="11" fill="#cabfa7" text-anchor="middle">مُخلَّص</text>
+
+          <!-- ── legend ── -->
+          <line x1="20" y1="338" x2="44" y2="338" stroke="#14110c" stroke-width="2"/>
+          <text x="50" y="342" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="8.5" fill="#14110c">core flow</text>
+          <line x1="140" y1="338" x2="164" y2="338" stroke="#0a5c33" stroke-width="2" stroke-dasharray="7 3"/>
+          <text x="170" y="342" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="8.5" fill="#0a5c33">opt-in adjunct</text>
+          <line x1="280" y1="338" x2="304" y2="338" stroke="#b00d28" stroke-width="2" stroke-dasharray="4 3"/>
+          <text x="310" y="342" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="8.5" fill="#b00d28">error / fix</text>
+        </svg>
+        <figcaption class="arch-caption" data-i18n="archCaption">
+          Tier 1 (WASM core) runs deterministic EN16931 + ZATCA-KSA rules offline, in browser or Node — zero dependencies, no cold-start. Tier 2 (Saxon Schematron) layers the full 211-rule EN16931 corpus and ~130 Peppol rules, opt-in only.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="block">
+      <p class="eyebrow" data-i18n="eyeProof">VERIFIED, NOT CLAIMED</p>
+      <div class="proof">
+        <div><div class="big">15/15</div><div class="lbl" data-i18n="p1">official EN16931 fixtures pass</div></div>
+        <div><div class="big">100%</div><div class="lbl" data-i18n="p2">client-side · never uploaded</div></div>
+        <div><div class="big">Apache-2.0</div><div class="lbl" data-i18n="p3">open source · no AGPL/EUPL</div></div>
+        <div><div class="big">ar / en</div><div class="lbl" data-i18n="p4">Arabic-first errors + fixes</div></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <p class="eyebrow" data-i18n="eyeJur">JURISDICTIONS</p>
+      <div class="jur">
+        <span class="now" data-i18n="j1">KSA · ZATCA Fatoora Phase 2 — now</span>
+        <span data-i18n="j2">UAE · PINT AE / Peppol</span>
+        <span data-i18n="j3">EU · EN16931 / Peppol BIS</span>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="cols">
+        <div class="card"><h3 data-i18n="w1h">Why open source</h3><p data-i18n="w1p">The rules are executable, tested code that fails in CI when they drift. Read it, fork it, run it yourself — more trustworthy than a black box.</p></div>
+        <div class="card"><h3 data-i18n="w2h">For ERP / POS vendors</h3><p data-i18n="w2p">Embed GCC compliance in days, not quarters. A library on your customers' infrastructure — no data-residency or accreditation burden on you.</p></div>
+      </div>
+      <p class="disclaimer"><span class="mono" data-i18n="discTag">// NOT TAX ADVICE</span> <span data-i18n="disc"> This toolkit reports results against published EN16931 / ZATCA rule sets. It is not tax advice and not a compliance guarantee. Live clearance requires your onboarded EGS + ZATCA credentials or a certified partner. Final compliance, certified integration and data residency are the customer's responsibility.</span></p>
+    </section>
+
+    <footer><span data-i18n="foot">Open source · Apache-2.0 ·</span> <a href="https://github.com/greymoth-jp/zatca-toolkit">github.com/greymoth-jp/zatca-toolkit</a></footer>
+  </div>
+
+  <script>
+    const I18N = {
+      en: { dir:"ltr", brand:"ZATCA TOOLKIT", navDocs:"DOCS", navCheck:"Free check",
+        kicker:"FATOORA PHASE 2 · WAVE 24 · OPEN SOURCE",
+        headline:'Clear every invoice. <span class="fear">Never stop the cash.</span>',
+        lede:"Open-source ZATCA toolkit. Generate, validate and sign compliant invoices in a few lines — on your own infrastructure. The invoice never leaves you.",
+        ctaCheck:"Check your invoice free", ctaGithub:"View on GitHub",
+        specTitle:"TAX INVOICE · فاتورة ضريبية", specSeller:"Seller VAT", specTotal:"Total incl. VAT", specVat:"VAT 15%", specChain:"ICV / PIH", specFoot:"validated client-side · EN16931 + ZATCA",
+        fear:'An invoice that is <span class="accent">not cleared</span> is not a valid tax invoice — your buyer cannot deduct the VAT, and your payment stops.',
+        eyeStart:"START IN SECONDS", secStart:"A few lines. Runs anywhere.", codeBar:"@zatca/sdk · CI-tested · browser or node",
+        eyeHow:"HOW IT WORKS", secHow:"Generate · validate · clear.",
+        s1h:"Generate", s1p:"Normalize your data to EN16931 and emit ZATCA-UBL 2.1 with ICV/PIH chain and QR.",
+        s2h:"Validate", s2p:"Deterministic ZATCA + EN16931 rules. Every failure tells you the fix, in Arabic and English.",
+        s3h:"Sign & clear", s3p:"secp256k1 XAdES signature; clearance goes through your onboarded credentials or a certified partner.",
+        eyeArch:"ARCHITECTURE", secArch:"Two-tier engine.",
+        archCaption:"Tier 1 (WASM core) runs deterministic EN16931 + ZATCA-KSA rules offline, in browser or Node — zero dependencies, no cold-start. Tier 2 (Saxon Schematron) layers the full 211-rule EN16931 corpus and ~130 Peppol rules, opt-in only.",
+        eyeProof:"VERIFIED, NOT CLAIMED", p1:"official EN16931 fixtures pass", p2:"client-side · never uploaded", p3:"open source · no AGPL/EUPL", p4:"Arabic-first errors + fixes",
+        eyeJur:"JURISDICTIONS", j1:"KSA · ZATCA Fatoora Phase 2 — now", j2:"UAE · PINT AE / Peppol", j3:"EU · EN16931 / Peppol BIS",
+        w1h:"Why open source", w1p:"The rules are executable, tested code that fails in CI when they drift. Read it, fork it, run it yourself — more trustworthy than a black box.",
+        w2h:"For ERP / POS vendors", w2p:"Embed GCC compliance in days, not quarters. A library on your customers' infrastructure — no data-residency or accreditation burden on you.",
+        discTag:"// NOT TAX ADVICE", disc:" This toolkit reports results against published EN16931 / ZATCA rule sets. It is not tax advice and not a compliance guarantee. Live clearance requires your onboarded EGS + ZATCA credentials or a certified partner. Final compliance, certified integration and data residency are the customer's responsibility.",
+        foot:"Open source · Apache-2.0 ·" },
+      ar: { dir:"rtl", brand:"مجموعة أدوات زاتكا", navDocs:"الوثائق", navCheck:"فحص مجاني",
+        kicker:"فاتورة المرحلة الثانية · الموجة ٢٤ · مفتوح المصدر",
+        headline:'خلّص كل فاتورة. <span class="fear">لا توقف التحصيل.</span>',
+        lede:"مجموعة أدوات زاتكا مفتوحة المصدر. أنشئ وتحقّق ووقّع فواتير متوافقة بأسطر قليلة — على بنيتك التحتية. لا تغادر الفاتورة جهازك.",
+        ctaCheck:"افحص فاتورتك مجاناً", ctaGithub:"على GitHub",
+        specTitle:"فاتورة ضريبية · TAX INVOICE", specSeller:"الرقم الضريبي للبائع", specTotal:"الإجمالي شامل الضريبة", specVat:"ضريبة ١٥٪", specChain:"ICV / PIH", specFoot:"تم التحقق داخل المتصفح · EN16931 + زاتكا",
+        fear:'الفاتورة التي <span class="accent">لا تُخلَّص</span> ليست فاتورة ضريبية صحيحة — لا يستطيع المشتري خصم الضريبة، ويتوقّف تحصيلك.',
+        eyeStart:"ابدأ خلال ثوانٍ", secStart:"أسطر قليلة. تعمل في أي مكان.", codeBar:"@zatca/sdk · مُختبَر في CI · متصفح أو Node",
+        eyeHow:"كيف يعمل", secHow:"أنشئ · تحقّق · خلّص.",
+        s1h:"أنشئ", s1p:"وحّد بياناتك إلى EN16931 وأصدر UBL 2.1 لزاتكا مع سلسلة ICV/PIH ورمز QR.",
+        s2h:"تحقّق", s2p:"قواعد زاتكا + EN16931 الحتمية. كل فشل يخبرك بالإصلاح، بالعربية والإنجليزية.",
+        s3h:"وقّع وخلّص", s3p:"توقيع XAdES بمنحنى secp256k1؛ يتم التخليص عبر اعتمادك أو شريك معتمد.",
+        eyeArch:"المعمارية", secArch:"محرك ثنائي الطبقات.",
+        archCaption:"الطبقة الأولى (نواة WASM) تشغّل قواعد EN16931 وزاتكا-KSA الحتمية دون اتصال، في المتصفح أو Node — بلا تبعيات ولا تأخير بدء. الطبقة الثانية (Saxon Schematron) تضيف ٢١١ قاعدة EN16931 كاملة و~١٣٠ قاعدة Peppol — اختيارية فقط.",
+        eyeProof:"مُثبَت، لا مُدّعى", p1:"نماذج EN16931 الرسمية ناجحة", p2:"داخل المتصفح · لا يُرفع أبداً", p3:"مفتوح المصدر · بلا AGPL/EUPL", p4:"أخطاء وإصلاحات بالعربية أولاً",
+        eyeJur:"النطاقات", j1:"السعودية · زاتكا فاتورة المرحلة ٢ — الآن", j2:"الإمارات · PINT AE / Peppol", j3:"الاتحاد الأوروبي · EN16931 / Peppol",
+        w1h:"لماذا مفتوح المصدر", w1p:"القواعد كود قابل للتنفيذ ومُختبَر يفشل في CI عند تغيّرها. اقرأه، انسخه، شغّله بنفسك — أجدر بالثقة من الصندوق المغلق.",
+        w2h:"لموردي ERP / POS", w2p:"ادمج امتثال الخليج في أيام لا أرباع سنة. مكتبة على بنية عملائك — بلا عبء إقامة البيانات أو الاعتماد عليك.",
+        discTag:"// ليست استشارة ضريبية", disc:" تعرض هذه الأداة النتائج وفق قواعد EN16931 / زاتكا المنشورة. ليست استشارة ضريبية ولا ضمان امتثال. يتطلّب التخليص الفعلي اعتماد EGS وبيانات زاتكا أو شريكاً معتمداً. الامتثال النهائي والتكامل المعتمد وإقامة البيانات مسؤولية العميل.",
+        foot:"مفتوح المصدر · Apache-2.0 ·" },
+    };
+    function setLang(l){
+      const t = I18N[l]; document.documentElement.lang = l; document.documentElement.dir = t.dir;
+      document.getElementById("en").setAttribute("aria-pressed", String(l==="en"));
+      document.getElementById("ar").setAttribute("aria-pressed", String(l==="ar"));
+      document.querySelectorAll("[data-i18n]").forEach(e=>{ const v=t[e.getAttribute("data-i18n")]; if(typeof v==="string") e.textContent=v; });
+      document.querySelectorAll("[data-i18n-html]").forEach(e=>{ const v=t[e.getAttribute("data-i18n-html")]; if(typeof v==="string") e.innerHTML=v; });
+    }
+    document.getElementById("en").addEventListener("click",()=>setLang("en"));
+    document.getElementById("ar").addEventListener("click",()=>setLang("ar"));
+    setLang("en");
+  </script>
+</body>
+</html>
