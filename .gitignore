@@ -32,3 +32,28 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+
+# === git-exposure-guardian (2026-06-22): never commit internal strategy/assets ===
+_docs/
+REQUIREMENTS.md
+RULES.md
+BUILD_HANDOFF.md
+HANDOFF_PROMPT_SHORT.md
+REFERENCES.md
+*MASTER*.md
+SELFKILL*.md
+COMPETITOR*.md
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.p8
+id_rsa*
+*-credentials.json
+serviceAccount*.json
+research_bus/
+MEMORY.md
+# === end git-exposure-guardian ===
