@@ -8,6 +8,8 @@
 
 [![CI](https://github.com/greymoth-jp/zatca-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/greymoth-jp/zatca-toolkit/actions/workflows/ci.yml) [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
 
+**▶ Live audit demo (runs entirely in your browser, no upload): https://greymoth-jp.github.io/zatca-toolkit/** — paste an invoice XML, get an instant pass/fail with the ar/en rule list. The validation engine is the Go core compiled to WASM.
+
 An invoice that is **not cleared** is **not a valid tax invoice** — your buyer cannot
 deduct the VAT, and you do not get paid. This toolkit is the open library that turns a
 normalized invoice into a ZATCA-conformant, signed UBL document with a valid QR — so
