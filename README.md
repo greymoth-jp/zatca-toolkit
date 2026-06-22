@@ -6,7 +6,7 @@
 
 `نوضّح كل فاتورة. لا نوقف التحصيل.`
 
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
+[![CI](https://github.com/greymoth-jp/zatca-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/greymoth-jp/zatca-toolkit/actions/workflows/ci.yml) [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
 
 An invoice that is **not cleared** is **not a valid tax invoice** — your buyer cannot
 deduct the VAT, and you do not get paid. This toolkit is the open library that turns a
