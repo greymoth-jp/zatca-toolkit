@@ -53,8 +53,20 @@ func main() {
 
 ### Quickstart (JS / TS — `@zatca/sdk`)
 
-The same engine runs in Node and the browser via WebAssembly. This snippet is **CI-tested**
-(`packages/sdk/examples/quickstart.mjs`), so it never goes stale:
+The same engine runs in Node and the browser via WebAssembly. The package is **not yet published
+to npm** — install it directly from this repo (the WASM engine is committed, so there is no build
+step):
+
+```bash
+git clone https://github.com/greymoth-jp/zatca-toolkit
+npm install ./zatca-toolkit/packages/sdk    # adds @zatca/sdk to your project
+```
+
+> **npm publish is coming soon.** Once it lands, the install becomes `npm install @zatca/sdk`;
+> the import below is unchanged. The bare `import` already resolves today after the local install
+> above.
+
+This snippet is **CI-tested** (`packages/sdk/examples/quickstart.mjs`), so it never goes stale:
 
 ```js
 import { Zatca } from "@zatca/sdk";
@@ -71,8 +83,8 @@ console.log(r.report.valid ? "would clear" : r.report.errors); // each error has
   tested rule set (runs in Node and the browser via WASM, no server, no Java); and (2) an
   **opt-in adjunct** ([`tools/conformance-adjunct`](./tools/conformance-adjunct/)) that runs the
   **official** EN16931 (211 rules) and Peppol BIS (~130 rules) Schematron locally via Saxon-HE —
-  the same authoritative rules accredited validators use, on your own machine. See
-  [`_docs/SAXON_ADJUNCT.md`](./_docs/SAXON_ADJUNCT.md).
+  the same authoritative rules accredited validators use, on your own machine (setup and usage are
+  documented in [`tools/conformance-adjunct/README.md`](./tools/conformance-adjunct/)).
 - **Official-fixture conformance**: the zero-dep engine is validated against the official EN16931
   example invoices — **15/15 parse and validate with zero false-positives**, and it **rejects**
   broken invoices with the right rule (two-way conformance suite, `packages/core/internal/conformance`).
@@ -82,11 +94,15 @@ console.log(r.report.valid ? "would clear" : r.report.errors); // each error has
 - **Green CI** on every push (engine `go test`, SDK `node --test`, WASM build, `zatca-check`) —
   **including the official-fixture conformance run**, so a rule that ever false-positives on a real
   EN16931 invoice turns the build red automatically.
-- **Rule freshness, in the open**: [`RULES.md`](./RULES.md) is the honest registry of every
-  business rule the engine enforces today (by profile layer) plus a changelog — rules are
-  executable, tested code, not a PDF that drifts.
-- These are deliberately scoped claims; see [`_docs/SELFKILL_SCORECARD.md`](./_docs/SELFKILL_SCORECARD.md)
-  for an honest, competitor-by-competitor scorecard (including where we do **not** compete).
+- **Rule freshness, in the open**: every business rule the engine enforces today lives as
+  executable, tested code in [`packages/core/internal/validate/`](./packages/core/internal/validate/),
+  organized by profile layer ([`en16931.go`](./packages/core/internal/validate/en16931.go),
+  [`peppol.go`](./packages/core/internal/validate/peppol.go),
+  [`zatca.go`](./packages/core/internal/validate/zatca.go)) with tests beside it — not a PDF that drifts.
+- These are deliberately scoped claims. This is a **library, not a hosted clearance platform** —
+  it does not transmit to ZATCA or operate accreditation, and it does not replace a certified EGS
+  or service provider (see "Compliance, scope, and responsibility" below for exactly where it
+  stops).
 
 ## Jurisdictions
 
@@ -111,7 +127,7 @@ a real end-to-end clearance against ZATCA (the onboarding handshake needs a genu
 OTP — the `cmd/zatca-onboard` tool is ready to run the moment one is available), byte-exact
 agreement with the official ZATCA SDK hashes (needs the SDK fixtures), and veraPDF-certified
 PDF/A-3b. We say "structurally correct" / "passes our rules", never "certified" or "guaranteed to
-clear". This honesty is deliberate — see [`_docs/STATUS.md`](./_docs/STATUS.md).
+clear". This honesty is deliberate.
 
 The toolkit deliberately avoids AGPL/EUPL/GPL/SSPL dependencies — only Apache-2.0 / MIT /
 BSD / ISC / MPL-2.0 components are used.
