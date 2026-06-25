@@ -16,9 +16,14 @@ jobs:
         with:
           go-version: '1.23'
           cache-dependency-path: packages/core/go.sum
-      - name: go test ./...
+      - name: go test ./... (incl. official-fixture conformance)
         working-directory: packages/core
-        run: go test ./...
+        # CONFORMANCE=1 runs the official-fixture conformance suite: it fetches the EUPL EN16931
+        # example invoices at runtime (never vendored) and fails the build if any rule
+        # false-positives on a real official invoice. Network/fetch failures are tolerated and do
+        # NOT trip the gate, so CI stays robust to a flaky fetch (see
+        # internal/conformance/conformance_test.go).
+        run: CONFORMANCE=1 go test ./...
 
   sdk:
     name: TypeScript SDK (node --test)
