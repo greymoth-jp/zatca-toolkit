@@ -11,16 +11,29 @@ This is **not tax advice and not a compliance guarantee.** The SDK prepares and 
 documents; it does **not** operate hosted clearance and is **not** a certified platform.
 See the repository [`NOTICE`](../../NOTICE) and [`README`](../../README.md).
 
-## Install / build
+## Install
 
-The engine ships as WebAssembly. Build it once before use:
+**Not yet published to npm.** Install it directly from the repo — the WASM engine is committed,
+so `import { Zatca } from "@zatca/sdk"` resolves with no build step:
 
 ```bash
-cd packages/sdk
-./build-wasm.sh        # produces wasm/engine.wasm + wasm/wasm_exec.js
+git clone https://github.com/greymoth-jp/zatca-toolkit
+npm install ./zatca-toolkit/packages/sdk    # adds @zatca/sdk to your project
 ```
 
 Requires Node >= 20 (this package is ESM, `"type": "module"`).
+
+> **npm publish is coming soon** — the install will become `npm install @zatca/sdk` and the
+> import is unchanged.
+
+### Rebuilding the engine (optional)
+
+The committed `wasm/engine.wasm` is what you import. To rebuild it from the Go core (needs Go):
+
+```bash
+cd packages/sdk
+./build-wasm.sh        # regenerates wasm/engine.wasm + wasm/wasm_exec.js
+```
 
 ## Quickstart
 
